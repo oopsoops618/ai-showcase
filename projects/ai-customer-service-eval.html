@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 客服智能体评估报告 · 作品集</title>
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --bg-card: #ffffff;
+    --text: #1a1a1a;
+    --text-dim: #5a5a5a;
+    --border: #e2e2e0;
+    --accent: #2563eb;
+    --accent-soft: #eef2ff;
+    --ok: #15803d;
+    --ok-bg: #f0fdf4;
+    --warn: #b45309;
+    --warn-bg: #fffbeb;
+    --code-bg: #f1f1ef;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16171a;
+      --bg-card: #1e1f23;
+      --text: #e8e8e6;
+      --text-dim: #9a9a96;
+      --border: #33343a;
+      --accent: #7aa2ff;
+      --accent-soft: #22283f;
+      --ok: #4ade80;
+      --ok-bg: #0f2419;
+      --warn: #fbbf24;
+      --warn-bg: #2a2110;
+      --code-bg: #26272c;
+    }
+  }
+  html[data-theme="dark"] {
+    --bg: #16171a; --bg-card: #1e1f23; --text: #e8e8e6; --text-dim: #9a9a96;
+    --border: #33343a; --accent: #7aa2ff; --accent-soft: #22283f;
+    --ok: #4ade80; --ok-bg: #0f2419; --warn: #fbbf24; --warn-bg: #2a2110; --code-bg: #26272c;
+  }
+  html[data-theme="light"] {
+    --bg: #f7f7f5; --bg-card: #ffffff; --text: #1a1a1a; --text-dim: #5a5a5a;
+    --border: #e2e2e0; --accent: #2563eb; --accent-soft: #eef2ff;
+    --ok: #15803d; --ok-bg: #f0fdf4; --warn: #b45309; --warn-bg: #fffbeb; --code-bg: #f1f1ef;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0;
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    line-height: 1.65;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 32px 20px 80px; }
+  .theme-toggle {
+    position: fixed; top: 16px; right: 16px; z-index: 10;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 6px 14px; font-size: 13px; cursor: pointer;
+    color: var(--text-dim);
+  }
+  .theme-toggle:hover { color: var(--text); }
+  .back-link {
+    display: inline-block; font-size: 13px; color: var(--text-dim); text-decoration: none;
+    margin-bottom: 8px;
+  }
+  .back-link:hover { color: var(--accent); }
+
+  /* ---- 一页纸精简版 ---- */
+  .cover { padding: 20px 0 20px; border-bottom: 1px solid var(--border); margin-bottom: 40px; }
+  .cover h1 { font-size: 26px; margin: 0 0 6px; }
+  .cover .subtitle { color: var(--text-dim); font-size: 15px; margin-bottom: 24px; }
+  .stat-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 24px 0; }
+  .stat-tile {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 18px; flex: 1; min-width: 140px;
+  }
+  .stat-tile .num { font-size: 24px; font-weight: 700; color: var(--accent); }
+  .stat-tile .label { font-size: 12.5px; color: var(--text-dim); margin-top: 2px; }
+  .star-block { margin: 20px 0; }
+  .star-block .tag {
+    display: inline-block; font-size: 12px; font-weight: 600; color: var(--accent);
+    background: var(--accent-soft); border-radius: 5px; padding: 2px 8px; margin-bottom: 6px;
+  }
+  .star-block p { margin: 4px 0 0; }
+  .badge-ok { color: var(--ok); background: var(--ok-bg); border-radius: 5px; padding: 1px 7px; font-size: 12.5px; font-weight: 600; }
+  .badge-warn { color: var(--warn); background: var(--warn-bg); border-radius: 5px; padding: 1px 7px; font-size: 12.5px; font-weight: 600; }
+
+  /* ---- 完整报告 ---- */
+  .report-header { margin-bottom: 24px; }
+  .report-header h2 { font-size: 20px; margin-bottom: 4px; }
+  .report-meta { font-size: 13px; color: var(--text-dim); }
+  .toc { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; margin-bottom: 32px; }
+  .toc h3 { margin: 0 0 8px; font-size: 14px; color: var(--text-dim); font-weight: 600; }
+  .toc ol { margin: 0; padding-left: 20px; columns: 2; font-size: 13.5px; }
+  .toc a { color: var(--text); text-decoration: none; }
+  .toc a:hover { color: var(--accent); }
+
+  section.chapter { margin-bottom: 36px; scroll-margin-top: 20px; }
+  section.chapter h3 {
+    font-size: 17px; border-left: 4px solid var(--accent); padding-left: 10px; margin: 0 0 12px;
+  }
+  section.chapter .note { font-size: 13px; color: var(--text-dim); margin-bottom: 10px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: 13.5px; }
+  th, td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--code-bg); font-weight: 600; }
+  tr:nth-child(even) td { background: rgba(128,128,128,0.04); }
+
+  .flow-box {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0;
+    font-size: 13.5px;
+  }
+  .flow-node {
+    background: var(--accent-soft); border: 1px solid var(--border); border-radius: 8px;
+    padding: 6px 12px; white-space: nowrap;
+  }
+  .flow-arrow { color: var(--text-dim); }
+
+  ul.tight, ol.tight { margin: 6px 0; padding-left: 22px; font-size: 13.5px; }
+  ul.tight li, ol.tight li { margin-bottom: 4px; }
+
+  code { background: var(--code-bg); border-radius: 4px; padding: 1px 5px; font-size: 12.5px; }
+
+  footer { text-align: center; color: var(--text-dim); font-size: 12px; padding-top: 30px; border-top: 1px solid var(--border); margin-top: 40px; }
+</style>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">🌓 切换主题</button>
+<div class="wrap">
+
+  <a class="back-link" href="../index.html">← 返回作品集首页</a>
+
+  <!-- ============ 层1：一页纸精简版 ============ -->
+  <div class="cover">
+    <h1>AI 客服智能体：从原始录音到可上线评估的完整闭环</h1>
+    <div class="subtitle">独立设计并落地一套"数据评估 + 质量评估"通用方法论，首个实例：连锁服务业 AI 电话客服</div>
+
+    <div class="star-block">
+      <span class="tag">S 背景</span>
+      <p>某连锁汽车服务品牌（200+ 门店）依赖人工客服接听全部门店来电，覆盖不了夜间和高峰同时来电，退款类咨询占比最高。业务方希望评估：这类高频客服场景能不能交给 AI 接管，接管到什么程度算靠谱。</p>
+    </div>
+    <div class="star-block">
+      <span class="tag">T 任务</span>
+      <p>独立设计一套可复用的智能体评估方法论（不是只服务这一个项目），并在这个真实客服场景里从零跑通一遍：先判断"这事值不值得做、数据够不够"（前置·数据评估），再判断"做出来的东西好不好、会不会退步"（后置·质量评估）。</p>
+    </div>
+    <div class="star-block">
+      <span class="tag">A 行动</span>
+      <p>从 1974 通真实通话录音出发，全量关键词扫描定位高频场景（退款 544 例、设备故障报修 68 例），人工过眼分流出可信金标（退款 19 条），构建结构化黄金测试集（88 条，覆盖文字/语音双通道），搭建自动化评测引擎，跑通 pytest 一键验收。</p>
+    </div>
+    <div class="star-block">
+      <span class="tag">R 结果</span>
+      <p>基线测试通过率 <b>95.5%</b>（pass^3，同一用例连跑 3 次全过才算通过），意图识别准确率 <b>98.6%</b>，禁忌违反 <b>0</b> 条，三条 SMART 验收标准全部达标——已交付并通过自动化测试与真实数据验证。</p>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-tile"><div class="num">1974</div><div class="label">真实通话录音（分析样本）</div></div>
+      <div class="stat-tile"><div class="num">544+68</div><div class="label">退款/故障 高频场景命中数</div></div>
+      <div class="stat-tile"><div class="num">88</div><div class="label">黄金测试集用例（文字+语音）</div></div>
+      <div class="stat-tile"><div class="num">95.5%</div><div class="label">基线通过率 @pass^3</div></div>
+      <div class="stat-tile"><div class="num">98.6%</div><div class="label">意图识别准确率</div></div>
+      <div class="stat-tile"><div class="num">0</div><div class="label">禁忌违反数</div></div>
+    </div>
+    <p class="note" style="color:var(--text-dim); font-size:12.5px;">数字来源：本项目黄金测试集与基线报告（2026-07-20，git 9569006）。真实客户名/门店信息/原始录音路径已脱敏，不出库。</p>
+  </div>
+
+  <!-- ============ 层2：完整内部报告 ============ -->
+  <div class="report-header">
+    <h2>完整内部报告（数据评估十节 + 质量评估基线）</h2>
+    <div class="report-meta">项目：AI 客服（连锁汽车服务，脱敏版）　评估者：本人独立完成　对外/内部：脱敏对外版</div>
+  </div>
+
+  <div class="toc">
+    <h3>目录</h3>
+    <ol>
+      <li><a href="#c1">目标能力清单</a></li>
+      <li><a href="#c2">目标业务流程主闭环</a></li>
+      <li><a href="#c3">场景分类判定</a></li>
+      <li><a href="#c4">家底盘点</a></li>
+      <li><a href="#c5">损耗测量</a></li>
+      <li><a href="#c6">分流结果</a></li>
+      <li><a href="#c7">资产清单</a></li>
+      <li><a href="#c8">能力对照缺口</a></li>
+      <li><a href="#c9">专家依赖</a></li>
+      <li><a href="#c10">总结论</a></li>
+      <li><a href="#c11">质量评估基线（后置）</a></li>
+    </ol>
+  </div>
+
+  <section class="chapter" id="c1">
+    <h3>1. 目标能力清单</h3>
+    <p class="note">要造的智能体想干哪几件事，每条附证据出处（不靠拍脑袋列）。</p>
+    <table>
+      <tr><th>#</th><th>能力</th><th>证据量级</th><th>说明</th></tr>
+      <tr><td>1</td><td>退款请求处理</td><td>544 例（全量扫描，27.6%）</td><td>最高优先级，量级遥遥领先</td></tr>
+      <tr><td>2</td><td>设备故障报修</td><td>68 例（全量扫描，3.4%）</td><td>第一轮盘点曾遗漏，后续补扫发现</td></tr>
+      <tr><td>3</td><td>情绪安抚</td><td>2 例（人工小样本，真实确认）</td><td>没有标准答案，需人工/裁判打分</td></tr>
+      <tr><td>4</td><td>答疑（FAQ）/操作指导</td><td>各 1 例（人工小样本）</td><td>样本薄，判定为数据缺口</td></tr>
+      <tr><td>5</td><td>兜底转人工</td><td>关键词命中 3 例，抽查后确凿证据 = 0</td><td>证据比预期弱，不能当已验证能力用</td></tr>
+      <tr><td>6</td><td>个性化服务</td><td>无实证</td><td>待业务方否决式确认，不列入本轮范围</td></tr>
+    </table>
+  </section>
+
+  <section class="chapter" id="c2">
+    <h3>2. 目标业务流程主闭环</h3>
+    <p class="note">把能力串成主链路，标关键路径（🤖AI造 · ⚙️传统软件 · 🔌甲方现有系统）。</p>
+    <div class="flow-box">
+      <div class="flow-node">客户来电 🔌</div><span class="flow-arrow">→</span>
+      <div class="flow-node">意图判定 🤖</div><span class="flow-arrow">→</span>
+      <div class="flow-node">退款：劝留一次 🤖</div><span class="flow-arrow">→</span>
+      <div class="flow-node">核对手机号 🤖</div><span class="flow-arrow">→</span>
+      <div class="flow-node">登记工单→转人工 ⚙️</div>
+    </div>
+    <div class="flow-box">
+      <div class="flow-node">故障报修</div><span class="flow-arrow">→</span>
+      <div class="flow-node">接收口头描述 🤖</div><span class="flow-arrow">→</span>
+      <div class="flow-node">建议换用附近机器 🤖</div><span class="flow-arrow">→</span>
+      <div class="flow-node">事后登记报修 ⚙️</div>
+    </div>
+    <p class="note">情绪安抚/个性化是叠加在上述任一分支之上的状态，不是并列的独立分支。现状与目标流程唯一的差异点：退款环节现状是"当场直接退款"，目标设计改为"登记工单+转人工"，是主动的流程变更决策，不是复刻现状。</p>
+  </section>
+
+  <section class="chapter" id="c3">
+    <h3>3. 场景分类判定</h3>
+    <table>
+      <tr><th>能力</th><th>交互方式</th><th>有无标准答案</th></tr>
+      <tr><td>退款请求处理</td><td>对话</td><td>有答案</td></tr>
+      <tr><td>答疑 / 操作指导</td><td>对话</td><td>有答案</td></tr>
+      <tr><td>设备故障报修</td><td>对话</td><td>有答案（分支较多但每步有明确对错）</td></tr>
+      <tr><td>情绪安抚</td><td>对话</td><td><b>没答案</b>（唯一落在这格的能力，走模拟+锚点评估路线）</td></tr>
+      <tr><td>兜底转人工</td><td>对话</td><td>有答案</td></tr>
+    </table>
+  </section>
+
+  <section class="chapter" id="c4">
+    <h3>4. 家底盘点</h3>
+    <p class="note"><b>4a 业务流程现状</b>（业务方一开口能说清的显性信息）：</p>
+    <ul class="tight">
+      <li>设备远程诊断能力：<span class="badge-warn">没有</span>，硬件/物联网建设未到位，判断全凭客户口头描述</li>
+      <li>转人工去向：一线客服负责人本人号码</li>
+      <li>退款执行方式：现状是当场直接退款；登记工单+转人工是设计意图，两者已明确区分不混淆</li>
+    </ul>
+    <p class="note"><b>4b 数据资产盘点</b>：</p>
+    <ul class="tight">
+      <li>数量：有效音频 4063 条，已转写 2066 条</li>
+      <li>时间覆盖：6 个月，其中 3 个月转写完成度较高，早期月份数据偏薄（已知缺口）</li>
+      <li>合规红线：涉及第三方 AI 服务商处理客户通话内容，号码/内容脱敏与数据出境问题已列为待业务方确认项</li>
+    </ul>
+  </section>
+
+  <section class="chapter" id="c5">
+    <h3>5. 损耗测量</h3>
+    <table>
+      <tr><th>转换环节</th><th>保真率/损耗</th><th>已知失真</th></tr>
+      <tr><td>碎片合并（ASR分段→整句）</td><td>抽样验证无信息损耗</td><td>合并规则边界抽查无漏洞</td></tr>
+      <tr><td>ASR 语音转写</td><td>未系统核验整体准确率</td><td>品牌名存在系统性谐音误识别，已知晓，不影响意图判断，但影响关键词精确匹配，已在规则里兜底多种变体</td></tr>
+    </table>
+  </section>
+
+  <section class="chapter" id="c6">
+    <h3>6. 分流结果</h3>
+    <p class="note">AI 快扫预分 → 只在刀刃上人工确认 → 不同质量走不同用途，逐能力分不一锅端。</p>
+    <table>
+      <tr><th>桶</th><th>内容</th><th>数字（实数）</th></tr>
+      <tr><td>够当金标</td><td>诉求清楚、处理完整、能当范本</td><td><b>19 条</b>（实况沿用 12 + 待业务方修正确认 7）</td></tr>
+      <tr><td>转到别的能力</td><td>关键词命中但实际不属于该场景</td><td>7 条</td></tr>
+      <tr><td>数据质量问题</td><td>转写异常</td><td>2 条</td></tr>
+      <tr><td>只做规则料/画像</td><td>常规同质化样本</td><td>约 516 条</td></tr>
+    </table>
+    <p class="note">最初按经验值估计能拿到约 40 条金标，人工过眼后修正为 19 条——原因：全量关键词扫描存在假阳性、同质化样本不需要凑数量。过眼过程中意外挖出更高价值的样本：真实劝留成功案例、退款+FAQ 双重案例，可复用到其他能力的样本缺口。</p>
+  </section>
+
+  <section class="chapter" id="c7">
+    <h3>7. 资产清单</h3>
+    <table>
+      <tr><th>资产类型</th><th>本项目产出</th></tr>
+      <tr><td>金标/知识库</td><td>退款 19 条金标已定死；设备故障池尚待分流</td></tr>
+      <tr><td>规则/守卫料</td><td>已知手机号不重复问、未解释退款原因不强制追问、劝留规则等确定性规则候选</td></tr>
+      <tr><td>基准线/分布</td><td>客户第一句带手机号占比 43.2%、全程无有效号码占比 37.3%、平均对话轮数 4.6 轮等</td></tr>
+      <tr><td>模拟角色</td><td>直给型/沉默型/解释情绪型三类客户语言模式画像，供测试用例参考</td></tr>
+      <tr><td>没答案能力的评估集（情绪安抚）</td><td>红线清单 + 正负参照锚点 + 评分维度，已产出，形态不同于常规金标</td></tr>
+    </table>
+  </section>
+
+  <section class="chapter" id="c8">
+    <h3>8. 能力对照缺口</h3>
+    <table>
+      <tr><th>能力</th><th>结论</th><th>缺口类型 + 补法</th></tr>
+      <tr><td>退款</td><td><span class="badge-ok">够</span></td><td>无数据缺口，剩余待办是流程性的（金标待业务方最终确认）</td></tr>
+      <tr><td>设备故障报修</td><td><span class="badge-ok">够（量级）</span></td><td>无数据缺口，待走分流确认</td></tr>
+      <tr><td>情绪安抚</td><td><span class="badge-warn">偏薄</span></td><td>已判定风险优先级本就低，暂不主动补</td></tr>
+      <tr><td>答疑 / 操作指导</td><td><span class="badge-warn">缺</span></td><td>可考古——尚有未转写录音可挖，一次转写两条能力一起补</td></tr>
+      <tr><td>兜底转人工</td><td><span class="badge-warn">缺（0 例确凿证据）</span></td><td>可考古 + 真缺兜底，需业务方确认是否本身发生率就低</td></tr>
+    </table>
+    <p class="note"><b>集成缺口</b>（不是数据问题，是甲方现有系统接不接得上）：账户余额/优惠券读写接口权限是否可用，优先级最高——直接决定最高频能力（退款）能不能真正落地，还是要降级为"AI 只登记、人工执行"。</p>
+    <p class="note"><b>瓶颈判断</b>：主要瓶颈在数据（部分能力样本偏薄）和集成权限两头，互不替代，可并行推进，不能只解决一头就宣布问题解决。</p>
+  </section>
+
+  <section class="chapter" id="c9">
+    <h3>9. 专家依赖</h3>
+    <p class="note">三层降级策略：能看行为痕迹就不猜，能靠 AI 模拟就不烦真人，真靠真人也压缩到 5 分钟级确认，不长期占用业务方时间。</p>
+    <table>
+      <tr><th>结论/金标</th><th>可信度等级</th><th>是否已做确认</th></tr>
+      <tr><td>退款金标·实况沿用（12条）</td><td>数据反推（客服实况处理无争议）</td><td>不需要，来源本身可信</td></tr>
+      <tr><td>退款金标·待修正（7条）</td><td>数据反推→待升级为业务确认</td><td>已就绪，清单已备好，预估 5 分钟即可完成</td></tr>
+      <tr><td>设备故障金标</td><td>数据反推</td><td>前置分流尚未完成，暂不递交确认</td></tr>
+    </table>
+  </section>
+
+  <section class="chapter" id="c10">
+    <h3>10. 总结论</h3>
+    <p><b>够用范围</b>：数据基础足以支撑退款、设备故障报修两条主力能力先行落地（合计 600+ 例证据，远超打底线），但还不能直接判定"现在就能上线"——卡在两处真实阻塞：金标未走完最终业务确认；账户读写接口权限尚未确认。</p>
+    <table>
+      <tr><th>分期</th><th>能力</th><th>理由</th></tr>
+      <tr><td>一期候选</td><td>退款、设备故障报修</td><td>数据够、量级大、高频主力</td></tr>
+      <tr><td>一期前置阻塞</td><td>账户读写接口权限确认</td><td>拿不到就只能降级为"AI 登记、人工执行"</td></tr>
+      <tr><td>二期候选</td><td>答疑、操作指导、兜底转人工</td><td>数据偏薄，先靠补数计划补齐再评</td></tr>
+      <tr><td>暂不做</td><td>情绪安抚、个性化</td><td>已判定风险/优先级，主动挂起，不是遗漏</td></tr>
+    </table>
+    <p class="note">本节为评估者起草的决策底稿，最终范围需业务方拍板定稿，不是终稿。</p>
+  </section>
+
+  <section class="chapter" id="c11">
+    <h3>11. 质量评估基线（后置）</h3>
+    <p class="note">数据评估的产出交给生产实现后，用黄金测试集 + 自动化评测引擎验证"做出来的东西好不好、会不会退步"。</p>
+    <table>
+      <tr><th>指标</th><th>目标</th><th>实际</th><th>达标</th></tr>
+      <tr><td>意图识别准确率</td><td>≥ 90%</td><td>98.6%</td><td><span class="badge-ok">✓</span></td></tr>
+      <tr><td>流程正确率（总通过率）</td><td>≥ 85%</td><td>95.5%</td><td><span class="badge-ok">✓</span></td></tr>
+      <tr><td>禁忌违反率</td><td>= 0</td><td>0 条</td><td><span class="badge-ok">✓</span></td></tr>
+    </table>
+    <table>
+      <tr><th>通道</th><th>通过/总数</th></tr>
+      <tr><td>文字端</td><td>28/28</td></tr>
+      <tr><td>语音端</td><td>56/60</td></tr>
+    </table>
+    <p class="note">延迟：均值 1.84s / p95 3.69s / 最大 4.92s。测试方法：pass^k（k=3），同一用例连续跑 3 次全部通过才计为通过，防止偶然通过掩盖不稳定问题。评测脚本可回跑，改动后重新验证有没有退步，不是一次性截图。</p>
+  </section>
+
+  <footer>
+    数字全部来自本项目黄金测试集与基线报告（2026-07-20），真实客户名、门店信息、原始录音路径均已脱敏移除，不出库。
+  </footer>
+</div>
+
+<script>
+  function toggleTheme() {
+    const html = document.documentElement;
+    const current = html.getAttribute('data-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    let next;
+    if (!current) next = prefersDark ? 'light' : 'dark';
+    else next = current === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  }
+  (function() {
+    const saved = localStorage.getItem('theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>合同审核 AI 评估诊断报告 · 作品集</title>
+<style>
+  :root {
+    --bg: #f7f7f5; --bg-card: #ffffff; --text: #1a1a1a; --text-dim: #5a5a5a;
+    --border: #e2e2e0; --accent: #2563eb; --accent-soft: #eef2ff;
+    --ok: #15803d; --ok-bg: #f0fdf4; --warn: #b45309; --warn-bg: #fffbeb; --code-bg: #f1f1ef;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16171a; --bg-card: #1e1f23; --text: #e8e8e6; --text-dim: #9a9a96;
+      --border: #33343a; --accent: #7aa2ff; --accent-soft: #22283f;
+      --ok: #4ade80; --ok-bg: #0f2419; --warn: #fbbf24; --warn-bg: #2a2110; --code-bg: #26272c;
+    }
+  }
+  html[data-theme="dark"] {
+    --bg: #16171a; --bg-card: #1e1f23; --text: #e8e8e6; --text-dim: #9a9a96;
+    --border: #33343a; --accent: #7aa2ff; --accent-soft: #22283f;
+    --ok: #4ade80; --ok-bg: #0f2419; --warn: #fbbf24; --warn-bg: #2a2110; --code-bg: #26272c;
+  }
+  html[data-theme="light"] {
+    --bg: #f7f7f5; --bg-card: #ffffff; --text: #1a1a1a; --text-dim: #5a5a5a;
+    --border: #e2e2e0; --accent: #2563eb; --accent-soft: #eef2ff;
+    --ok: #15803d; --ok-bg: #f0fdf4; --warn: #b45309; --warn-bg: #fffbeb; --code-bg: #f1f1ef;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    line-height: 1.65;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 32px 20px 80px; }
+  .theme-toggle {
+    position: fixed; top: 16px; right: 16px; z-index: 10;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 6px 14px; font-size: 13px; cursor: pointer; color: var(--text-dim);
+  }
+  .theme-toggle:hover { color: var(--text); }
+  .back-link { display: inline-block; font-size: 13px; color: var(--text-dim); text-decoration: none; margin-bottom: 8px; }
+  .back-link:hover { color: var(--accent); }
+
+  .cover { padding: 20px 0 20px; border-bottom: 1px solid var(--border); margin-bottom: 40px; }
+  .cover h1 { font-size: 26px; margin: 0 0 6px; }
+  .cover .subtitle { color: var(--text-dim); font-size: 15px; margin-bottom: 24px; }
+  .stat-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 24px 0; }
+  .stat-tile { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; flex: 1; min-width: 140px; }
+  .stat-tile .num { font-size: 24px; font-weight: 700; color: var(--accent); }
+  .stat-tile .label { font-size: 12.5px; color: var(--text-dim); margin-top: 2px; }
+  .star-block { margin: 20px 0; }
+  .star-block .tag { display: inline-block; font-size: 12px; font-weight: 600; color: var(--accent); background: var(--accent-soft); border-radius: 5px; padding: 2px 8px; margin-bottom: 6px; }
+  .star-block p { margin: 4px 0 0; }
+  .badge-ok { color: var(--ok); background: var(--ok-bg); border-radius: 5px; padding: 1px 7px; font-size: 12.5px; font-weight: 600; }
+  .badge-warn { color: var(--warn); background: var(--warn-bg); border-radius: 5px; padding: 1px 7px; font-size: 12.5px; font-weight: 600; }
+  .callout {
+    background: var(--accent-soft); border-left: 3px solid var(--accent); border-radius: 6px;
+    padding: 12px 16px; font-size: 13.5px; margin: 20px 0;
+  }
+
+  .report-header { margin-bottom: 24px; }
+  .report-header h2 { font-size: 20px; margin-bottom: 4px; }
+  .report-meta { font-size: 13px; color: var(--text-dim); }
+  .toc { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; margin-bottom: 32px; }
+  .toc h3 { margin: 0 0 8px; font-size: 14px; color: var(--text-dim); font-weight: 600; }
+  .toc ol { margin: 0; padding-left: 20px; columns: 2; font-size: 13.5px; }
+  .toc a { color: var(--text); text-decoration: none; }
+  .toc a:hover { color: var(--accent); }
+
+  section.chapter { margin-bottom: 36px; scroll-margin-top: 20px; }
+  section.chapter h3 { font-size: 17px; border-left: 4px solid var(--accent); padding-left: 10px; margin: 0 0 12px; }
+  section.chapter .note { font-size: 13px; color: var(--text-dim); margin-bottom: 10px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: 13.5px; }
+  th, td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--code-bg); font-weight: 600; }
+  tr:nth-child(even) td { background: rgba(128,128,128,0.04); }
+
+  .flow-box { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0; font-size: 13.5px; }
+  .flow-node { background: var(--accent-soft); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; white-space: nowrap; }
+  .flow-arrow { color: var(--text-dim); }
+
+  ul.tight, ol.tight { margin: 6px 0; padding-left: 22px; font-size: 13.5px; }
+  ul.tight li, ol.tight li { margin-bottom: 4px; }
+  code { background: var(--code-bg); border-radius: 4px; padding: 1px 5px; font-size: 12.5px; }
+  footer { text-align: center; color: var(--text-dim); font-size: 12px; padding-top: 30px; border-top: 1px solid var(--border); margin-top: 40px; }
+</style>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">🌓 切换主题</button>
+<div class="wrap">
+
+  <a class="back-link" href="../index.html">← 返回作品集首页</a>
+
+  <!-- ============ 层1：一页纸精简版 ============ -->
+  <div class="cover">
+    <h1>合同审核 AI：给已上线系统做一次独立评估体检</h1>
+    <div class="subtitle">同一套"数据评估 + 质量评估"方法论，第二个实例——不是从零立项，是对一个已交付系统做回溯性评估审计</div>
+
+    <div class="star-block">
+      <span class="tag">S 背景</span>
+      <p>某连锁品牌的合同审核 AI 已交付上线，核心能力是风险条款识别（四类风险×三级严重度）+ 归档比对 + 格式保真校验，日常在跑。但这套系统从未被系统性验证过"评估基础扎不扎实"——有能力，不等于有证据证明这个能力持续可靠。</p>
+    </div>
+    <div class="star-block">
+      <span class="tag">T 任务</span>
+      <p>用同一套评估方法论（已在客服 AI 项目验证过）对这个已上线系统做独立审计：数据够不够、有没有黄金测试集、评估基础是否扎实，如果不扎实，精准定位卡在哪一步、卡的原因是什么。</p>
+    </div>
+    <div class="star-block">
+      <span class="tag">A 行动</span>
+      <p>盘点生产数据库（201 条合同记录）+ 本地原始文档（120 份，117 份已可读文本），核实代码里实际实现的能力边界（不是需求文档里"计划做什么"），逐条对照项目内部早期设计的黄金数据集方案，排查这份方案是否真正落地执行过。</p>
+    </div>
+    <div class="star-block">
+      <span class="tag">R 结果</span>
+      <p><b>诊断结论：数据基础足够（超过方法论自身设定的打底线），技术能力已在生产验证，但黄金测试集从未真正构建——真实瓶颈是专家审定时间，不是数据或技术。</b>把一个"说不清哪里没做完"的模糊状态，变成了一份可执行的清单：具体缺什么、该找谁要、要多久。</p>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-tile"><div class="num">201</div><div class="label">生产库合同记录（只读核实）</div></div>
+      <div class="stat-tile"><div class="num">120</div><div class="label">本地原始合同文档</div></div>
+      <div class="stat-tile"><div class="num">117</div><div class="label">已转可读文本（97.5%）</div></div>
+      <div class="stat-tile"><div class="num">3</div><div class="label">已核实的生产在用能力</div></div>
+      <div class="stat-tile"><div class="num">1</div><div class="label">精准定位的核心瓶颈</div></div>
+    </div>
+    <p class="note" style="color:var(--text-dim); font-size:12.5px;">数据来源：生产数据库只读查询 + 代码库核实（2026-08）。真实客户名/门店信息已脱敏，不出库。</p>
+
+    <div class="callout">
+      <b>这份报告刻意不隐藏"未完成"的部分</b>——评估的价值不在于"证明一切都很好"，在于诚实、精准地定位问题出在哪。这也是评估工作本身该有的样子：不为了好看而回避真实结论。
+    </div>
+  </div>
+
+  <!-- ============ 层2：完整内部报告 ============ -->
+  <div class="report-header">
+    <h2>完整内部报告（前置数据评估 + 诊断结论）</h2>
+    <div class="report-meta">项目：合同审核 AI（脱敏版）　评估者：本人独立完成　性质：回溯性审计</div>
+  </div>
+
+  <div class="toc">
+    <h3>目录</h3>
+    <ol>
+      <li><a href="#c1">已核实的能力边界</a></li>
+      <li><a href="#c2">业务流程主闭环</a></li>
+      <li><a href="#c3">数据资产盘点</a></li>
+      <li><a href="#c4">损耗测量</a></li>
+      <li><a href="#c5">评估基础审计结果</a></li>
+      <li><a href="#c6">能力对照缺口</a></li>
+      <li><a href="#c7">诊断结论与建议</a></li>
+    </ol>
+  </div>
+
+  <section class="chapter" id="c1">
+    <h3>1. 已核实的能力边界</h3>
+    <p class="note">核实方式：直接读生产代码，不是读需求文档做推测。</p>
+    <table>
+      <tr><th>能力</th><th>状态</th><th>说明</th></tr>
+      <tr><td>合同风险审查</td><td><span class="badge-ok">生产在用</span></td><td>单次 LLM 调用，输出四类风险（模糊条款/不公平条款/缺失条款/合规问题）× 三级严重度，每条含定位、说明、修改建议、逐字原文对照</td></tr>
+      <tr><td>归档比对</td><td><span class="badge-ok">生产在用</span></td><td>签字版与审核通过版自动比对，逐条列出改动，防止签字前被动手脚</td></tr>
+      <tr><td>格式保真导出</td><td><span class="badge-ok">生产在用</span></td><td>Word 导出格式一致性检查，经过多轮迭代收敛</td></tr>
+      <tr><td>更高阶检索增强策略</td><td><span class="badge-warn">未启用/待确认</span></td><td>一条路线已在设计阶段被放弃，另一条存在代码但成熟度未核实——诚实标注"不确定"，不假装知道</td></tr>
+    </table>
+  </section>
+
+  <section class="chapter" id="c2">
+    <h3>2. 业务流程主闭环</h3>
+    <div class="flow-box">
+      <div class="flow-node">合同上传 🔌</div><span class="flow-arrow">→</span>
+      <div class="flow-node">内容提取 ⚙️</div><span class="flow-arrow">→</span>
+      <div class="flow-node">风险审查 🤖</div><span class="flow-arrow">→</span>
+      <div class="flow-node">结构化输出 🤖</div><span class="flow-arrow">→</span>
+      <div class="flow-node">人工复核 🔌</div><span class="flow-arrow">→</span>
+      <div class="flow-node">定稿导出+归档 🤖</div>
+    </div>
+    <p class="note">🤖AI造 · ⚙️传统软件 · 🔌人工/甲方现有系统。AI 段落是风险审查、格式保真、归档比对三块，其余是流程性环节。</p>
+  </section>
+
+  <section class="chapter" id="c3">
+    <h3>3. 数据资产盘点</h3>
+    <ul class="tight">
+      <li>生产数据库合同记录：201 条（多种状态混合：草稿/已归档/标准/待处理等）</li>
+      <li>本地原始合同文档：120 份为全集，其中 117 份已转为可读文本（97.5%），<span class="badge-warn">33 份仍是纯图片/扫描件，未转出文字</span></li>
+      <li>PII 密度较高：涉及个人身份信息、银行账户、企业信用代码等，脱敏工作量本身是这批数据的一块硬骨头，已识别但尚未批量处理</li>
+    </ul>
+  </section>
+
+  <section class="chapter" id="c4">
+    <h3>4. 损耗测量</h3>
+    <table>
+      <tr><th>转换环节</th><th>结果</th></tr>
+      <tr><td>原始文档 → 可读文本</td><td>117/120 = 97.5% 转换成功，33 份纯图片/扫描件是已知缺口</td></tr>
+      <tr><td>已转文本的质量</td><td>尚未系统性人工抽样核对，标注为待办</td></tr>
+    </table>
+  </section>
+
+  <section class="chapter" id="c5">
+    <h3>5. 评估基础审计结果</h3>
+    <p><b>这是本次审计最重要的发现</b>：项目内部早期确实设计过一套完整的黄金数据集评估方案（结构化测试用例、多维度评分标准、实施路线图一应俱全），但审计发现——<b>这套方案从未真正被执行过</b>。代码库里没有对应的结构化测试用例文件，生产数据库里也没有一张表存放"AI 审查结果 + 人工确认状态"这类记录。</p>
+    <p class="note">跟这套方法论的另一个实例（客服 AI 项目）对比：客服项目已经从真实通话记录里人工过眼分流出金标；合同项目连"分流"这一步都还没开始——方案有了，没人执行。</p>
+  </section>
+
+  <section class="chapter" id="c6">
+    <h3>6. 能力对照缺口</h3>
+    <table>
+      <tr><th>能力</th><th>结论</th><th>缺口性质</th></tr>
+      <tr><td>合同风险审查</td><td><span class="badge-warn">评估集缺失</span></td><td><b>不是数据不够、不是技术能力不行——是黄金测试集从未构建。</b>数据量（120份，超过方法论自身设定的50-100条打底线）本身是够的</td></tr>
+      <tr><td>格式保真校验</td><td><span class="badge-ok">已充分验证</span></td><td>这块能力已经过多轮生产验证，评估基础扎实</td></tr>
+    </table>
+    <p class="note"><b>关键判断</b>：这个项目的真实瓶颈是<b>专家审定时间</b>——合同风险判断的"标准答案"必须由法律专业人员确认，这是没有捷径可以绕过的一步，跟数据量、技术能力都无关。</p>
+  </section>
+
+  <section class="chapter" id="c7">
+    <h3>7. 诊断结论与建议</h3>
+    <p><b>一句话结论</b>：这套合同审核 AI 已经在生产稳定运行，核心能力有真实证据支撑，但"这套系统的判断持续可靠"这件事，目前还缺一份能拿出来验证的评估证据——不是系统不行，是验证系统的那一步没人做完。</p>
+    <table>
+      <tr><th>建议分期</th><th>内容</th><th>理由</th></tr>
+      <tr><td>优先级最高</td><td>推进专家审定金标（法律专业人员参与）</td><td>唯一的硬阻塞，其余工作都要等这一步</td></tr>
+      <tr><td>可并行</td><td>33 份图片合同 OCR 转换</td><td>技术上可独立解决，不依赖专家时间</td></tr>
+      <tr><td>暂不做</td><td>成熟度未确认的检索增强路线评估</td><td>优先级低于把核心能力的评估基础做扎实</td></tr>
+    </table>
+    <p class="note">本报告的价值不在于证明这个系统"已经很完美"，在于用同一套可复用的方法论，快速、诚实地把一个模糊的"感觉还行"变成一份具体、可执行、可追责到人的清单。</p>
+  </section>
+
+  <footer>
+    数字来自生产数据库只读查询与代码库核实（2026-08），真实客户名、门店信息、原始文档路径均已脱敏移除，不出库。
+  </footer>
+</div>
+
+<script>
+  function toggleTheme() {
+    const html = document.documentElement;
+    const current = html.getAttribute('data-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    let next;
+    if (!current) next = prefersDark ? 'light' : 'dark';
+    else next = current === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  }
+  (function() {
+    const saved = localStorage.getItem('theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+  })();
+</script>
+</body>
+</html>

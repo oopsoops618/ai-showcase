@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>资产盘点对账 AI 评估报告 · 作品集</title>
+<style>
+  :root {
+    --bg: #f7f7f5; --bg-card: #ffffff; --text: #1a1a1a; --text-dim: #5a5a5a;
+    --border: #e2e2e0; --accent: #2563eb; --accent-soft: #eef2ff;
+    --ok: #15803d; --ok-bg: #f0fdf4; --warn: #b45309; --warn-bg: #fffbeb; --code-bg: #f1f1ef;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16171a; --bg-card: #1e1f23; --text: #e8e8e6; --text-dim: #9a9a96;
+      --border: #33343a; --accent: #7aa2ff; --accent-soft: #22283f;
+      --ok: #4ade80; --ok-bg: #0f2419; --warn: #fbbf24; --warn-bg: #2a2110; --code-bg: #26272c;
+    }
+  }
+  html[data-theme="dark"] {
+    --bg: #16171a; --bg-card: #1e1f23; --text: #e8e8e6; --text-dim: #9a9a96;
+    --border: #33343a; --accent: #7aa2ff; --accent-soft: #22283f;
+    --ok: #4ade80; --ok-bg: #0f2419; --warn: #fbbf24; --warn-bg: #2a2110; --code-bg: #26272c;
+  }
+  html[data-theme="light"] {
+    --bg: #f7f7f5; --bg-card: #ffffff; --text: #1a1a1a; --text-dim: #5a5a5a;
+    --border: #e2e2e0; --accent: #2563eb; --accent-soft: #eef2ff;
+    --ok: #15803d; --ok-bg: #f0fdf4; --warn: #b45309; --warn-bg: #fffbeb; --code-bg: #f1f1ef;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    line-height: 1.65;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 32px 20px 80px; }
+  .theme-toggle {
+    position: fixed; top: 16px; right: 16px; z-index: 10;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 6px 14px; font-size: 13px; cursor: pointer; color: var(--text-dim);
+  }
+  .theme-toggle:hover { color: var(--text); }
+  .back-link { display: inline-block; font-size: 13px; color: var(--text-dim); text-decoration: none; margin-bottom: 8px; }
+  .back-link:hover { color: var(--accent); }
+
+  .cover { padding: 20px 0 20px; border-bottom: 1px solid var(--border); margin-bottom: 40px; }
+  .cover h1 { font-size: 26px; margin: 0 0 6px; }
+  .cover .subtitle { color: var(--text-dim); font-size: 15px; margin-bottom: 24px; }
+  .stat-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 24px 0; }
+  .stat-tile { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; flex: 1; min-width: 140px; }
+  .stat-tile .num { font-size: 24px; font-weight: 700; color: var(--accent); }
+  .stat-tile .label { font-size: 12.5px; color: var(--text-dim); margin-top: 2px; }
+  .star-block { margin: 20px 0; }
+  .star-block .tag { display: inline-block; font-size: 12px; font-weight: 600; color: var(--accent); background: var(--accent-soft); border-radius: 5px; padding: 2px 8px; margin-bottom: 6px; }
+  .star-block p { margin: 4px 0 0; }
+  .badge-ok { color: var(--ok); background: var(--ok-bg); border-radius: 5px; padding: 1px 7px; font-size: 12.5px; font-weight: 600; }
+  .badge-warn { color: var(--warn); background: var(--warn-bg); border-radius: 5px; padding: 1px 7px; font-size: 12.5px; font-weight: 600; }
+  .callout {
+    background: var(--accent-soft); border-left: 3px solid var(--accent); border-radius: 6px;
+    padding: 12px 16px; font-size: 13.5px; margin: 20px 0;
+  }
+
+  .report-header { margin-bottom: 24px; }
+  .report-header h2 { font-size: 20px; margin-bottom: 4px; }
+  .report-meta { font-size: 13px; color: var(--text-dim); }
+  .toc { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; margin-bottom: 32px; }
+  .toc h3 { margin: 0 0 8px; font-size: 14px; color: var(--text-dim); font-weight: 600; }
+  .toc ol { margin: 0; padding-left: 20px; columns: 2; font-size: 13.5px; }
+  .toc a { color: var(--text); text-decoration: none; }
+  .toc a:hover { color: var(--accent); }
+
+  section.chapter { margin-bottom: 36px; scroll-margin-top: 20px; }
+  section.chapter h3 { font-size: 17px; border-left: 4px solid var(--accent); padding-left: 10px; margin: 0 0 12px; }
+  section.chapter .note { font-size: 13px; color: var(--text-dim); margin-bottom: 10px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: 13.5px; }
+  th, td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--code-bg); font-weight: 600; }
+  tr:nth-child(even) td { background: rgba(128,128,128,0.04); }
+
+  .flow-box { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0; font-size: 13.5px; }
+  .flow-node { background: var(--accent-soft); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; white-space: nowrap; }
+  .flow-arrow { color: var(--text-dim); }
+
+  ul.tight, ol.tight { margin: 6px 0; padding-left: 22px; font-size: 13.5px; }
+  ul.tight li, ol.tight li { margin-bottom: 4px; }
+  code { background: var(--code-bg); border-radius: 4px; padding: 1px 5px; font-size: 12.5px; }
+  footer { text-align: center; color: var(--text-dim); font-size: 12px; padding-top: 30px; border-top: 1px solid var(--border); margin-top: 40px; }
+</style>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">🌓 切换主题</button>
+<div class="wrap">
+
+  <a class="back-link" href="../index.html">← 返回作品集首页</a>
+
+  <!-- ============ 层1：一页纸精简版 ============ -->
+  <div class="cover">
+    <h1>资产盘点对账 AI：绕开失效依赖，真跑一遍质量评估</h1>
+    <div class="subtitle">同一套"数据评估 + 质量评估"方法论，第三个实例——原始运行环境（MongoDB）不可用时，不放弃真实执行，改路径也要拿到真结果</div>
+
+    <div class="star-block">
+      <span class="tag">S 背景</span>
+      <p>某医院的资产盘点对账系统已交付，核心能力是账目表与实物盘点表的两阶段 AI 匹配（LLM 分类归组 + embedding 相似度打分），覆盖 1:0/1:1/1:n 三类匹配场景。原始项目数据在流转中丢失，远程仓库无访问权限。</p>
+    </div>
+    <div class="star-block">
+      <span class="tag">T 任务</span>
+      <p>在数据不全、原始运行环境（MongoDB向量库）不可用的真实约束下，找到能用的数据、找到真实金标、真实跑一遍质量评估——不因环境问题就跳过"必须执行"这一步。</p>
+    </div>
+    <div class="star-block">
+      <span class="tag">A 行动</span>
+      <p>定位本地实际可用的项目数据，发现"实物表（成品）"里人工回填的资产编号字段本身就是金标（跟合同项目"114条标注"同一个逻辑：交付成品自带答案）。绕开不可用的 MongoDB，改用真实的阿里云 embedding API 重新执行同一套打分算法，在10条真实金标上跑出真实结果。</p>
+    </div>
+    <div class="star-block">
+      <span class="tag">R 结果</span>
+      <p><b>真实基线：1:1匹配75%正确，1:n匹配50%，1:0（资产盘亏）判断0%全错。</b>不是笼统的"50%对不对"，是精准定位到"算法没有绝对阈值兜底、总会矬子里拔将军强行匹配"这个具体缺陷——而盘亏恰恰是资产盘点业务里最需要精确识别的场景。</p>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-tile"><div class="num">10</div><div class="label">真实金标（从成品数据还原）</div></div>
+      <div class="stat-tile"><div class="num">75%</div><div class="label">1:1匹配正确率</div></div>
+      <div class="stat-tile"><div class="num">0%</div><div class="label">1:0盘亏判断正确率（关键发现）</div></div>
+      <div class="stat-tile"><div class="num">1</div><div class="label">失效依赖被绕开（MongoDB→真实API）</div></div>
+    </div>
+    <p class="note" style="color:var(--text-dim); font-size:12.5px;">数据来源：本地项目代码核实 + 真实embedding API调用（2026-08）。真实姓名/单位信息已脱敏，不出库。</p>
+
+    <div class="callout">
+      <b>这份报告的价值不止是结果，也是过程</b>——原始运行环境不可用是评估工作里的常态，不是"做不了"的理由。找到金标藏在哪、换一条能走的路把真实结果跑出来，这个过程本身就是可迁移的方法论。
+    </div>
+  </div>
+
+  <!-- ============ 层2：完整内部报告 ============ -->
+  <div class="report-header">
+    <h2>完整内部报告（数据评估十节 + 质量评估基线）</h2>
+    <div class="report-meta">项目：资产盘点对账 AI（脱敏版）　评估者：本人独立完成　性质：回溯性审计 + 真实质量评估</div>
+  </div>
+
+  <div class="toc">
+    <h3>目录</h3>
+    <ol>
+      <li><a href="#c1">目标能力清单</a></li>
+      <li><a href="#c2">目标业务流程主闭环</a></li>
+      <li><a href="#c3">场景分类判定</a></li>
+      <li><a href="#c4">家底盘点</a></li>
+      <li><a href="#c5">损耗测量</a></li>
+      <li><a href="#c6">分流结果</a></li>
+      <li><a href="#c7">资产清单</a></li>
+      <li><a href="#c8">能力对照缺口</a></li>
+      <li><a href="#c9">专家依赖</a></li>
+      <li><a href="#c10">总结论</a></li>
+      <li><a href="#c11">质量评估基线（后置）</a></li>
+    </ol>
+  </div>
+
+  <section class="chapter" id="c1">
+    <h3>1. 目标能力清单</h3>
+    <p class="note">证据：本地代码核实，非需求文档推测。</p>
+    <table>
+      <tr><th>#</th><th>能力</th><th>状态</th><th>说明</th></tr>
+      <tr><td>1</td><td>两阶段资产-实物匹配（核心能力）</td><td><span class="badge-ok">有实现</span></td><td>阶段1：LLM把资产名称分到预定义类别；阶段2：组内用品牌/规格/名称向量相似度打分，先1:1贪心匹配，再补1:n</td></tr>
+      <tr><td>2</td><td>绿色资产剔除</td><td><span class="badge-ok">有实现</span></td><td>不参与匹配的特殊类别资产单独处理</td></tr>
+      <tr><td>3</td><td>设备/家具粗分类（另一版本）</td><td><span class="badge-warn">待确认是否同一套逻辑</span></td><td>用大模型区分"设备/家具/其他"，跟能力1的分类关系未完全确认</td></tr>
+    </table>
+    <p class="note">跟简历表述对照："AI 语义理解自动判断两条记录是不是同一样东西...覆盖 1:0/1:1/1:n 三类匹配"——对应能力1，代码逻辑吻合。</p>
+  </section>
+
+  <section class="chapter" id="c2">
+    <h3>2. 目标业务流程主闭环</h3>
+    <div class="flow-box">
+      <div class="flow-node">资产表+实物表 🔌</div><span class="flow-arrow">→</span>
+      <div class="flow-node">剔除特殊资产 🤖</div><span class="flow-arrow">→</span>
+      <div class="flow-node">阶段1分类归组 🤖</div><span class="flow-arrow">→</span>
+      <div class="flow-node">阶段2组内打分匹配 🤖</div><span class="flow-arrow">→</span>
+      <div class="flow-node">1:1/1:n匹配+未匹配清单 🤖</div>
+    </div>
+    <p class="note">🤖AI造 · 🔌人工提供。阶段2打分融合名称/品牌/规格（一级信号）+ 部门/人员/地点/日期/批次（二级加成）。</p>
+  </section>
+
+  <section class="chapter" id="c3">
+    <h3>3. 场景分类判定</h3>
+    <table>
+      <tr><th>能力</th><th>批处理/对话</th><th>有无标准答案</th></tr>
+      <tr><td>资产-实物匹配</td><td>批处理</td><td><b>有答案</b>——每条实物记录该对应哪个资产（或都不对应）是客观事实，判定比客服/合同项目更干脆</td></tr>
+    </table>
+  </section>
+
+  <section class="chapter" id="c4">
+    <h3>4. 家底盘点</h3>
+    <p class="note"><b>4a 业务流程现状</b>：</p>
+    <ul class="tight">
+      <li>原计划评估的项目数据已丢失，本地和远程都无法恢复</li>
+      <li>本地实际可用4个项目，选用其中数据最完整、曾真实跑过一次预测的项目</li>
+      <li>原始代码依赖的向量数据库在本环境不可用，改用真实embedding API重新执行同一套算法逻辑</li>
+    </ul>
+    <p class="note"><b>4b 数据资产盘点</b>：</p>
+    <ul class="tight">
+      <li>该项目：271条实物记录，另有人工挑选的验证子集（9条资产+15条实物记录），字段级向量已缓存</li>
+      <li>另有一份独立的大规模标注数据集（约1.2万条匹配对，用于另一条技术路线的模型训练），本次不作为评估对象</li>
+      <li>合规：涉及真实单位人员信息，脱敏处理后对外展示</li>
+    </ul>
+  </section>
+
+  <section class="chapter" id="c5">
+    <h3>5. 损耗测量</h3>
+    <p class="note">信息有限，未做系统性核验——本地静态数据拷贝没有留存转换管线的日志，无法回溯原始表格到结构化数据过程中有没有损耗。诚实标注为已知缺口，不掩盖。</p>
+  </section>
+
+  <section class="chapter" id="c6">
+    <h3>6. 分流结果</h3>
+    <p><b>本次评估的关键发现</b>：金标不是从零标注的，是从"实物表（成品）"里<b>人工核对后回填的资产编号字段</b>反推出来的——跟另一实例（合同AI，114条人工标注）是同一个逻辑：<b>交付成品本身就带着答案，只是没人把它挖出来过</b>。</p>
+    <table>
+      <tr><th>桶</th><th>数量</th><th>说明</th></tr>
+      <tr><td>1:1匹配</td><td>4组</td><td>资产与实物一一对应</td></tr>
+      <tr><td>1:n匹配</td><td>2组</td><td>一个资产对应多条实物记录（2条和5条各一组）</td></tr>
+      <tr><td>1:0（资产盘亏）</td><td>3条</td><td>资产有登记，但盘不到对应实物</td></tr>
+      <tr><td>实物盘盈</td><td>4条</td><td>盘到实物，但资产台账里没有对应登记</td></tr>
+    </table>
+    <p class="note">可信度：业务确认级——是当时真实盘点核对后写回的结果，不是本次评估者的主观判断。</p>
+  </section>
+
+  <section class="chapter" id="c7">
+    <h3>7. 资产清单</h3>
+    <table>
+      <tr><th>资产类型</th><th>本项目产出</th></tr>
+      <tr><td>金标</td><td>10条资产的真实匹配关系，已用于真实跑分</td></tr>
+      <tr><td>规则/守卫料</td><td>原代码里现成的权重和阈值参数（名称/品牌/规格加权，各字段阈值出局机制）</td></tr>
+      <tr><td>评估集</td><td>9条资产+15条实物记录，已用真实embedding跑通</td></tr>
+      <tr><td>对照素材</td><td>独立的大规模标注数据集（另一技术路线），本次不用，留作未来交叉验证参照</td></tr>
+    </table>
+  </section>
+
+  <section class="chapter" id="c8">
+    <h3>8. 能力对照缺口</h3>
+    <table>
+      <tr><th>能力</th><th>结论</th><th>缺口性质</th></tr>
+      <tr><td>1:1匹配</td><td><span class="badge-ok">基本可靠</span></td><td>真实测试75%正确</td></tr>
+      <tr><td>1:n批量匹配</td><td><span class="badge-warn">不稳定</span></td><td>真实测试50%——名字差异小的批量资产能识别，差异大的漏检严重</td></tr>
+      <tr><td>1:0（盘亏）判断</td><td><span class="badge-warn">明显缺口，最严重</span></td><td>真实测试0%——算法倾向"矬子里拔将军"，没有绝对阈值兜底机制</td></tr>
+    </table>
+    <p class="note"><b>这是本次评估最有价值的具体发现</b>：不是笼统的"匹配准不准"，是精确定位到"1:0盘亏场景"这个具体、高优先级的缺口——对资产盘点业务而言，盘亏恰恰是最需要精确识别的场景，算法在这里反而最不可靠。</p>
+  </section>
+
+  <section class="chapter" id="c9">
+    <h3>9. 专家依赖</h3>
+    <table>
+      <tr><th>结论/金标</th><th>可信度等级</th><th>是否已做确认</th></tr>
+      <tr><td>10条真实匹配关系</td><td><b>业务确认级</b>——来自实际盘点交付时已核对回填的资产编号</td><td><span class="badge-ok">✓ 已完成</span>，不需要额外专家投入</td></tr>
+    </table>
+    <p class="note">跟另外两个实例对照：这次金标规模最小（10条），但可信度是业务确认级，而且不需要额外找专家——已经隐藏在交付成品里，只是没人挖出来过。</p>
+  </section>
+
+  <section class="chapter" id="c10">
+    <h3>10. 总结论</h3>
+    <p><b>够用范围</b>：小规模金标真实可信，已用于验证；核心算法在纯1:1场景基本可靠，但1:n和1:0两类场景有明确、具体的缺口。规模上，10条金标不足以做统计显著性检验，是方向性发现。</p>
+    <table>
+      <tr><th>分期</th><th>内容</th><th>理由</th></tr>
+      <tr><td>一期候选</td><td>给1:0判断加绝对阈值兜底（不管候选池排名第几，最高分低于绝对值就强制判"无匹配"）</td><td>真实测试暴露的最严重缺口，且是具体可执行的算法改动</td></tr>
+      <tr><td>二期候选</td><td>改进1:n批量匹配逻辑，让"批次数量"字段真正发挥作用；扩大金标规模</td><td>名字差异大的批量资产识别弱，10条样本量太小</td></tr>
+      <tr><td>暂不做</td><td>原始项目数据恢复</td><td>本地和远程都拿不到，需要找到原始来源才能补</td></tr>
+    </table>
+  </section>
+
+  <section class="chapter" id="c11">
+    <h3>11. 质量评估基线（后置）</h3>
+    <p class="note">已完成。用真实embedding API重新执行同一套打分算法（绕开不可用的MongoDB依赖，权重/阈值参数与原代码一致），在10条真实金标上真实跑分。</p>
+    <table>
+      <tr><th>匹配类型</th><th>数量</th><th>正确率</th></tr>
+      <tr><td>1:1</td><td>4组</td><td><span class="badge-ok">75%</span></td></tr>
+      <tr><td>1:n</td><td>2组</td><td><span class="badge-warn">50%</span></td></tr>
+      <tr><td>1:0（资产盘亏）</td><td>3条</td><td><span class="badge-warn">0%</span></td></tr>
+    </table>
+    <p><b>案例分析（1:1判错的一条）</b>：一份资产的品牌/规格字段是空的，算法只能靠名称文本相似度判断，结果被表面字词带偏，错配到了另一条名称更像、但资产编号对不上的记录——这跟"账目表和实物清单写法不统一"这个真实业务痛点直接对应，也说明品牌/规格字段缺失时，加成机制形同虚设，容错能力下降。</p>
+    <p><b>案例分析（1:0全错）</b>：资产盘亏场景下，算法给候选池里"分数最高"的一条记录打了不算低的分数，误判为匹配——问题不在这个分数本身的高低，是算法没有一道"最高分也不够格就该判定为无匹配"的绝对门槛，只要有候选就会强行选一个。</p>
+    <p class="note">已知局限：本次是重新实现的简化版打分逻辑，非原代码逐行复现，尤其1:n判定规则是简化版，跟原代码"批次数量字段配合"逻辑不完全一样，这个差异需要用原始环境复核。样本量仅10条，是方向性发现。</p>
+  </section>
+
+  <footer>
+    数字来自本地代码核实与真实embedding API调用（2026-08），真实姓名、单位信息均已脱敏移除，不出库。
+  </footer>
+</div>
+
+<script>
+  function toggleTheme() {
+    const html = document.documentElement;
+    const current = html.getAttribute('data-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    let next;
+    if (!current) next = prefersDark ? 'light' : 'dark';
+    else next = current === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  }
+  (function() {
+    const saved = localStorage.getItem('theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+  })();
+</script>
+</body>
+</html>

@@ -50,7 +50,30 @@
     background: var(--accent-soft); border-radius: 8px; padding: 12px 16px;
   }
 
-  .grid { margin-top: 36px; display: grid; grid-template-columns: 1fr; gap: 16px; }
+  .method-section { margin-top: 40px; }
+  .method-section h2 { font-size: 20px; margin: 0 0 6px; }
+  .method-section .method-lede { color: var(--text-dim); font-size: 14px; margin-bottom: 20px; }
+  .method-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+  @media (max-width: 600px) { .method-compare { grid-template-columns: 1fr; } }
+  .method-card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px;
+  }
+  .method-card .method-tag {
+    display: inline-block; font-size: 11.5px; font-weight: 700; letter-spacing: .02em;
+    color: var(--accent); background: var(--accent-soft); border-radius: 5px; padding: 2px 8px; margin-bottom: 8px;
+  }
+  .method-card h4 { margin: 0 0 6px; font-size: 15px; }
+  .method-card p { margin: 0; font-size: 13px; color: var(--text-dim); }
+  .method-card .method-flow { margin-top: 8px; font-size: 12.5px; color: var(--text); }
+  .method-proof {
+    background: var(--accent-soft); border-left: 3px solid var(--accent); border-radius: 6px;
+    padding: 12px 16px; font-size: 13.5px; margin-bottom: 8px;
+  }
+  .instances-heading { margin-top: 36px; }
+  .instances-heading h3 { font-size: 16px; margin: 0 0 4px; }
+  .instances-heading p { margin: 0; font-size: 13px; color: var(--text-dim); }
+
+  .grid { margin-top: 16px; display: grid; grid-template-columns: 1fr; gap: 16px; }
   .card {
     display: block; text-decoration: none; color: var(--text);
     background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
@@ -71,8 +94,37 @@
 <div class="wrap">
   <header>
     <h1>全栈超级开发者 · AI 应用落地实战派</h1>
-    <div class="positioning">一个人 + AI，交付通常需要 3-5 人团队的活。下面是具体的落地案例和方法论产出，每个链接点开都是完整报告，不是摘要。</div>
+    <div class="positioning">一个人 + AI，交付通常需要 3-5 人团队的活。核心产出是下面这套评估方法论，三个不同领域的实例是它的验证记录，不是三件孤立的案例。</div>
   </header>
+
+  <div class="method-section">
+    <h2>一套通用方法论：给任何"AI 输出对不对"的场景</h2>
+    <p class="method-lede">传统软件能用断言测好坏；AI 智能体常常没有唯一正确答案、同一输入每次输出还不一样，断言测不了。这套方法论把评估拆成两段，各自有明确的动作和产出，不靠拍脑袋判断"这个AI靠不靠谱"。</p>
+
+    <div class="method-compare">
+      <div class="method-card">
+        <span class="method-tag">前置 · 数据评估</span>
+        <h4>动手造之前：值不值得做</h4>
+        <p>数据够不够、场景对不对、金标从哪来。三个实例都验证过一件事——金标不一定要从零标注，交付成品里往往已经藏着答案（人工核对回填的字段、业务确认过的标注表），只是没人把它挖出来。</p>
+        <div class="method-flow">目标能力清单 → 场景分类 → 家底盘点 → 分流出金标 → 定缺口</div>
+      </div>
+      <div class="method-card">
+        <span class="method-tag">后置 · 质量评估</span>
+        <h4>造出来之后：做得好不好</h4>
+        <p>拿金标去真跑一遍，不是纸面推演。原始环境不可用时（依赖缺失、权限拿不到），找替代路径也要跑出真结果，不能因为"跑不通"就跳过这一步。</p>
+        <div class="method-flow">建金标测试集 → 真实调用系统 → 人工/脚本判读 → 出基线报告</div>
+      </div>
+    </div>
+
+    <div class="method-proof">
+      <b>不是纸上的方法论</b>——已经在三个完全不同的领域验证过（对话式客服、文档审核、结构化数据匹配），每次都不是"验证通过"就结束，而是精确定位到一个具体、可执行的真实问题，包括两次公开记录在案的自我纠错。方法论经不经得住推敲，靠的是这些真实执行记录，不是描述本身写得好不好。
+    </div>
+  </div>
+
+  <div class="instances-heading">
+    <h3>三个实例，同一套方法论</h3>
+    <p>点开每一份都是完整报告，不是摘要——前置数据评估十节 + 后置质量评估基线，格式统一。</p>
+  </div>
 
   <div class="grid">
     <a class="card" href="projects/ai-customer-service-eval.html">
